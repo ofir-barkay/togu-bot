@@ -1,0 +1,6 @@
+agency-swarm
+openai
+python-dotenv
+gradio
+python-telegram-bot
+dotenv
