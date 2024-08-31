@@ -70,6 +70,8 @@ Agent: The current weather is rainy with a temperature of 55°F. It might be bet
      use the following pattern for a google maps url:
      https://www.google.com/maps/search/{PLACE_NAME},{PLACE_ADDRESS}
      {PLACE_NAME} and {PLACE_ADDRESS} are the placeholders for the actual place's data, and they should have + (plus) signs instead of spaces to make it as a valid URL arguments.
+       - {PLACE_NAME} and {PLACE_ADDRESS} are the placeholders for the actual place's data, and they should have + (plus) signs instead of spaces to make it as a valid URL arguments.
+       - if {PLACE_NAME} contains parenthesis symbols - ( ) , remove them and don't insert them into the URL.
     
 **Example:**
 
