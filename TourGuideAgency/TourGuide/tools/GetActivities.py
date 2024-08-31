@@ -13,8 +13,6 @@ class GetActivities(BaseTool):
     longitude: float = Field(..., description="The longitude of the location.")
     query: str = Field(..., description="Search term to match places to specific activities or categories.")
     radius: int = Field(1000, description="The radius (in meters) within which to search for activities.")
-    categories: str = Field(..., description="Comma-separated list of category IDs that match the user query context,"
-                                             " based on the fsq-categories file. You can enter multiple categories if needed.")
     limit: int = Field(10, description="The maximum number of results to return.")
     sort: str = Field("distance",
                       description="Sort order of results. Possible values: 'distance', 'relevance', 'popularity'.")
@@ -34,7 +32,6 @@ class GetActivities(BaseTool):
                 "ll": f"{self.latitude},{self.longitude}",
                 "query": self.query,
                 "radius": self.radius,
-                "categories": self.categories,
                 "limit": self.limit,
                 "sort": self.sort,
                 "open_now": str(self.open_now).lower(),

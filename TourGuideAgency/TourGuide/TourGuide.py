@@ -1,6 +1,5 @@
 from agency_swarm.agents import Agent
 
-
 class TourGuide(Agent):
     def __init__(self):
         super().__init__(

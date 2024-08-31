@@ -36,8 +36,6 @@ AWAIT_LOCATION, RELAY_AGENT = 1, 2
 
 @require_auth()
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    agency = init_agency()
-    context.bot_data.update({'agency':agency})
     await update.message.reply_text(f'Hello! Im ToGu - Your AI Tour Guide 🌍🌎🌏')
     location_button = KeyboardButton(text="Share Location", request_location=True)
     location_reply_markup = ReplyKeyboardMarkup([[location_button]], one_time_keyboard=True)
@@ -65,35 +63,29 @@ async def relay(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     if agency.shared_state.get('finished') == True:
         agency = context.bot_data.get('agency')
-        agency.delete()
-
+        logger.info(agency.get_completion('now reset your session and forget this conversation.'))
         return ConversationHandler.END
 
     return RELAY_AGENT
 
 async def abort(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    context.bot_data.get('agency').delete()
+    logger.info(agency.get_completion('something unexpected happend. please reset your session and forget this conversation so we could start over.'))
     await update.message.reply_text('aborted, ready to start over')
 
 
 async def error_handler(update: object, context:ContextTypes.DEFAULT_TYPE):
-    # Log the error before we do anything else, so we can see it even if something breaks.
     logger.error("Exception while handling an update:", exc_info=context.error)
-    # traceback.format_exception returns the usual python message about an exception, but as a
-    # list of strings rather than a single string, so we have to join them together.
     tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
     tb_string = "".join(tb_list)
-    # Build the message with some markup and additional information about what happened.
-    # You might need to add some logic to deal with messages longer than the 4096 character limit.
     update_str = update.to_dict() if isinstance(update, Update) else str(update)
-    message = ''.join([
-        "An exception was raised while handling an update\n",
-        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}",
-        "</pre>\n\n",
-        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n",
-        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n",
-        f"<pre>{html.escape(tb_string)}</pre>"
-    ])
+    message = f"""
+        An exception was raised while handling an update\n
+        <pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}
+        </pre>\n\n
+        <pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n
+        <pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n
+        <pre>{html.escape(tb_string)}</pre>
+        """
     await update.message.reply_text(text=message[:4096], parse_mode=ParseMode.HTML)
 
 
@@ -113,6 +105,8 @@ if __name__ == '__main__':
         fallbacks=[CommandHandler('abort', abort)]
     )
     app = ApplicationBuilder().token(os.getenv('TELEGRAM_BOT_TOKEN')).build()
+    agency = init_agency()
+    app.bot_data.update({'agency': agency})
     app.add_handler(conversation)
     app.add_handler(MessageHandler(filters.TEXT, prompt_start))
     app.add_error_handler(error_handler)
